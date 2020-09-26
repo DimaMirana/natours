@@ -18,12 +18,20 @@ exports.getAllTours = async (req, res) => {
         
         let query = Tour.find(JSON.parse(queryStr));
         
-        // 2) SORTING sorting based on a field,if multiple documant have same value on a field then group them by 2nd params
+        // 2) SORTING 
         if(req.query.sort){
             const sortBy = req.query.sort.split(',').join(' ');
             query = query.sort(sortBy);
         } else {
             query = query.sort('-createdAt');
+        }
+        
+        // 3) Field limiting -> only sending the fiels that the user writed in query string i.e projection in mongodb
+        if(req.query.fields){
+            const fields = req.query.fields.split(',').join(' ');
+            query = query.select(fields); 
+        } else {
+            query = query.select('-__v')
         }
         
         //EXECUTE THE QUERY
