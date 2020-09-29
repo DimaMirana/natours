@@ -26,7 +26,7 @@ exports.getAllTours = async (req, res) => {
             query = query.sort('-createdAt');
         }
         
-        // 3) Field limiting -> only sending the fiels that the user writed in query string i.e projection in mongodb
+        // 3) Field limiting
         if(req.query.fields){
             const fields = req.query.fields.split(',').join(' ');
             query = query.select(fields); 
@@ -34,8 +34,22 @@ exports.getAllTours = async (req, res) => {
             query = query.select('-__v')
         }
         
+        // 4) Pagination
+        const page = req.query.page * 1 || 1;
+        const limit = req.query.limit * 1 || 100;
+        const skip = (page - 1) * limit;
+        
+        // page = 3&limit=10,1-10 page 1,11-20 page 2,21-30 page 3...
+        query = query.skip(skip).limit(limit);
+        
+        if(req.query.page) {
+            const numTours = await Tour.countDocuments();
+            if(skip>=numTours) throw new Error('This page does not exist');
+        }
+        
         //EXECUTE THE QUERY
         const tours = await query;
+        //query.sort().select().skip(skip).limit(limit)
         
         //SEND RESPONSE
         res.status(200).json({
