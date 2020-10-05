@@ -6,6 +6,9 @@ const router = express.Router();
 
 // the tour routes
 router
+    .route('/top-5-cheap')
+    .get(tourController.aliasTopTours,tourController.getAllTours)
+router
     .route('/')
     .get(tourController.getAllTours) //get all tours data from the server 
     .post(tourController.createTour) //chaining multiple middleware
